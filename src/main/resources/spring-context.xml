@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"  
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"  
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:tx="http://www.springframework.org/schema/tx"
+    xmlns:aop="http://www.springframework.org/schema/aop"  
+    xmlns:task="http://www.springframework.org/schema/task" 
+    xsi:schemaLocation="
+    http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd   
+    http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
+    http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
+    http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
+    http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-4.0.xsd">
+    
+     <bean class="com.starsguide.common.AppProp">
+    	<property name="URL" value="${repository.url}" />
+    	<property name="APP_KEY" value="${repository.app.key}" />
+    	<property name="APP_SECRET" value="${repository.app.secret}" />
+    	<property name="AUTH_URL" value="${auth.url}" />
+    	<property name="MESSAGE_URL" value="${message.url}" />
+    </bean>
+    
+    <context:component-scan base-package="com.starsguide" />
+    <task:annotation-driven />
+
+	<bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">   
+        <property name="dataSource" ref="dataSource"/>  
+        <property name="jpaVendorAdapter" ref="hibernateJpaVendorAdapter"/>  
+        <property name="packagesToScan">
+        	<list>
+		       <value>com.starsguide.dao</value>
+		       <value>com.starsguide.pojo.entity</value>
+		    </list>
+        </property>
+        <property name="jpaProperties">  
+            <props>  
+                <prop key="hibernate.ejb.naming_strategy">org.hibernate.cfg.ImprovedNamingStrategy</prop>  
+                <prop key="hibernate.show_sql">true</prop>  
+                <prop key="hibernate.hbm2ddl.auto">update</prop>  
+            </props>  
+        </property>  
+    </bean>
+    
+    <bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">  
+        <property name="entityManagerFactory" ref="entityManagerFactory"/>  
+    </bean>
+    
+    <tx:advice id="txAdvice" transaction-manager="transactionManager">
+    	<tx:attributes>
+    		<tx:method name="save*" propagation="REQUIRED" />
+    		<tx:method name="refresh*" propagation="REQUIRED" />
+    		<tx:method name="update*" propagation="REQUIRED" />
+    		<tx:method name="delete*" propagation="REQUIRED" />
+    		<tx:method name="*" read-only="true" />
+    	</tx:attributes>
+    </tx:advice>
+    
+    <aop:config>
+    	<aop:pointcut id="servicePointcut" expression="execution(* com.starsguide.service.*.*(..))" />
+    	<aop:advisor pointcut-ref="servicePointcut" advice-ref="txAdvice" />
+    </aop:config>
+    
+    <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">  
+        <property name="driverClassName" value="${jdbc.driver}" />  
+        <property name="url" value="${jdbc.url}" />  
+        <property name="username" value="${jdbc.username}" />  
+        <property name="password" value="${jdbc.password}" /> 
+    </bean>
+    
+    <bean id="hibernateJpaVendorAdapter" class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">  
+		<property name="databasePlatform" value="${jpa.dialect}" />  
+	</bean>
+    
+    <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+    	<property name="targetObject">
+    		<bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+    			<property name="targetClass" value="java.lang.System" />
+    			<property name="targetMethod" value="getProperties" />
+    		</bean>
+    	</property>
+    	<property name="targetMethod" value="putAll" />
+    	<property name="arguments">
+    		<props>
+    			<prop key="URL">${repository.url}</prop>
+    			<prop key="APPKEY">${repository.app.key}</prop>
+    			<prop key="APPSECRET">${repository.app.secret}</prop>
+    		</props>
+    	</property>
+    </bean>
+    
+    <beans profile="development">  
+        <context:property-placeholder ignore-unresolvable="true" location="classpath:sandbox/datasource.properties" />
+    </beans>
+    
+    <beans profile="production">
+    	<context:property-placeholder ignore-unresolvable="true" location="classpath:production/datasource.properties" />
+    </beans>
+</beans>

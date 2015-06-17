@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: trunk
+Bundle-SymbolicName: trunk
+Bundle-Version: 1.0.0.qualifier
+Export-Package: com.starsguide.common,
+ com.starsguide.common.util,
+ com.starsguide.controller,
+ com.starsguide.dao,
+ com.starsguide.dao.impl,
+ com.starsguide.listener,
+ com.starsguide.pojo,
+ com.starsguide.rao,
+ com.starsguide.rao.impl,
+ com.starsguide.service,
+ com.starsguide.service.impl,
+ com.starsguide.task
