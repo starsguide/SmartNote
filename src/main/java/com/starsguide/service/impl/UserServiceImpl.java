@@ -1,7 +1,6 @@
 package com.starsguide.service.impl;
 
 import java.io.IOException;
-import java.net.SocketTimeoutException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,20 +8,14 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.starsguide.common.AppEnum;
 import com.starsguide.common.AppProp;
 import com.starsguide.common.util.JsonConverter;
 import com.starsguide.dao.MenuDao;
 import com.starsguide.dao.ProductDao;
 import com.starsguide.dao.UserDao;
 import com.starsguide.pojo.Menu;
-import com.starsguide.pojo.Product;
 import com.starsguide.pojo.User;
-import com.starsguide.rao.ItemRao;
-import com.starsguide.rao.TmcRao;
 import com.starsguide.service.UserService;
-import com.taobao.api.ApiException;
-import com.taobao.api.domain.Item;
 import com.taobao.api.internal.util.WebUtils;
 
 @Service
@@ -33,45 +26,16 @@ public class UserServiceImpl implements UserService {
 	@Autowired
 	private MenuDao menuDao;
 	
-	@Autowired
-	private TmcRao tmcRao;
+//	@Autowired
+//	private TmcRao tmcRao;
 	
 	@Autowired
 	private ProductDao productDao;
 	
-	@Autowired
-	private ItemRao itemRao;
+//	@Autowired
+//	private ItemRao itemRao;
 	
-	public void firstLogin(User user) {
-		// save user info into db
-		saveUserInfo(user);
-		List<Item> itmes = null;
-		try {
-			SENDREQUEST : itmes = itemRao.getItemsOnSale(user.getAccess_token());
-			
-			if(itmes != null){
-				for(Item itme : itmes){
-					Product product = JsonConverter.mergeItem(itme);
-					productDao.save(product);
-				}
-			}
-		} catch (ApiException e1) {
-//			if(e1 instanceof SocketTimeoutException){
-//				continue SENDREQUEST;
-//			}
-			e1.printStackTrace();
-			
-		}
-		
-		try {
-			tmcRao.permitUserTmc(user.getAccess_token(), AppEnum.TmcTopic.ITEMDOWNSHELF);
-			tmcRao.permitUserTmc(user.getAccess_token(), AppEnum.TmcTopic.TRADECREATE);
-//			tmcRao.addUserTmcGroup(user.getTaobao_user_nick(), AppEnum.TmcGroup.ITEM.name());
-		} catch (ApiException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
+	public void firstLogin(User user) {}
 	
 	public void saveUserInfo(User userSG){
 		userConfigDao.save(userSG);
